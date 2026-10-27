@@ -1,0 +1,165 @@
+/*
+ * Instagram Unsaver & Unliker — injected styles.
+ *
+ * Everything is namespaced with `igu-` and anchored to `#igu-panel` so that
+ * Instagram's own (obfuscated, frequently regenerated) class names cannot
+ * collide with ours.
+ */
+
+#igu-panel {
+	position: fixed;
+	top: 76px;
+	right: 16px;
+	z-index: 2147483000;
+	width: 280px;
+	box-sizing: border-box;
+	padding: 12px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 12px;
+	background: #ffffff;
+	box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+	color: #1a1a1a;
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+		sans-serif;
+	font-size: 13px;
+	line-height: 1.4;
+	text-align: left;
+}
+
+#igu-panel,
+#igu-panel * {
+	box-sizing: border-box;
+}
+
+#igu-panel [hidden] {
+	display: none !important;
+}
+
+#igu-panel button {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	letter-spacing: normal;
+	text-transform: none;
+	cursor: pointer;
+}
+
+#igu-panel .igu-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+#igu-panel .igu-title {
+	color: #1a1a1a;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+#igu-panel .igu-icon-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 6px;
+	color: #8e8e8e;
+	font-size: 15px;
+	line-height: 1;
+}
+
+#igu-panel .igu-icon-btn:hover {
+	background: #f2f2f2;
+}
+
+#igu-panel .igu-status {
+	margin: 0;
+	color: #555555;
+	font-size: 12px;
+	word-break: break-word;
+}
+
+#igu-panel .igu-bar {
+	height: 6px;
+	margin-top: 10px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: #efefef;
+}
+
+#igu-panel .igu-bar-fill {
+	height: 100%;
+	border-radius: 999px;
+	background: #0095f6;
+}
+
+#igu-panel .igu-bar-fill.igu-indeterminate {
+	width: 35%;
+	animation: igu-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes igu-sweep {
+	from {
+		transform: translateX(-100%);
+	}
+	to {
+		transform: translateX(320%);
+	}
+}
+
+#igu-panel .igu-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+#igu-panel .igu-actions-trailing {
+	margin-top: 12px;
+}
+
+#igu-panel .igu-btn {
+	width: 100%;
+	padding: 8px 10px;
+	border-radius: 8px;
+	background: #efefef;
+	color: #262626;
+	font-size: 12px;
+	font-weight: 600;
+	text-align: center;
+}
+
+#igu-panel .igu-btn:hover:not(:disabled) {
+	background: #e2e2e2;
+}
+
+#igu-panel .igu-btn:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+#igu-panel .igu-btn-primary {
+	background: #0095f6;
+	color: #ffffff;
+}
+
+#igu-panel .igu-btn-primary:hover:not(:disabled) {
+	background: #1877f2;
+}
+
+#igu-panel .igu-btn-danger {
+	background: #ed4956;
+	color: #ffffff;
+}
+
+#igu-panel .igu-btn-danger:hover:not(:disabled) {
+	background: #d63a46;
+}
+
+#igu-panel.igu-collapsed .igu-body {
+	display: none;
+}
