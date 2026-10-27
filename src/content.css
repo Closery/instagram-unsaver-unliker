@@ -159,8 +159,12 @@
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 8px;
-	color: #555555;
+	color: #1a1a1a;
 	font-size: 11px;
+}
+
+#igu-panel .igu-field label {
+	color: inherit;
 }
 
 #igu-panel .igu-field-value {
