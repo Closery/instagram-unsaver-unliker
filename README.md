@@ -150,3 +150,7 @@ respond — see [Troubleshooting](#troubleshooting) for how to find it.
 For pull requests: keep the change focused, and say which selector or icon path
 you touched, since those are the pieces that break when Instagram ships a new
 build.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
