@@ -87,38 +87,6 @@ icons/                 Generated toolbar and store icons
 .github/ISSUE_TEMPLATE Bug report template
 ```
 
-## Publishing to the Chrome Web Store
-
-1. Bump `version` in `manifest.json` (the store accepts `0.x` builds).
-2. Zip **only** `manifest.json`, `src/` and `icons/` — no `.git`, no `tools/`.
-3. Upload the zip in the
-   [developer dashboard](https://chrome.google.com/webstore/devconsole).
-4. Store listing needs, at minimum: the 128 px icon (included), a screenshot
-   (1280×800 or 640×400), a short description and a category.
-5. On the privacy tab: the extension requests only `storage` (to remember the
-   delay setting) and collects **no** user data — say exactly that.
-
-Two notes for review:
-
-- The name contains a third-party trademark. If the listing is rejected for
-  impersonation, rename the extension to something neutral (for example
-  _Saved Sweeper_) and keep "Instagram" only in the description, where it is
-  clearly descriptive.
-- Keep the description accurate. Do not advertise bulk unlike until it ships —
-  the store can reject a listing that promises a feature the build does not have.
-
-## Limitations
-
-- Unsaving only works through the **post viewer**, so one saved post has to be
-  opened first. The panel reminds you when you are still on the grid.
-- The run follows whatever order Instagram's **Next** arrow walks after a post is
-  opened from the saved list.
-- The 300 ms default pacing is fast on purpose. On a few hundred posts it can
-  trip Instagram's rate limiting (a temporary action block). Raise the delay under
-  **Advanced settings**; the limit is enforced by Instagram, not by the extension.
-- Automated mass unsaving is not something Instagram's terms of service
-  explicitly allow. Use it on your own account and at your own risk.
-
 ## Troubleshooting
 
 **"This post doesn't look saved…"** — either the post was not opened from the
