@@ -12,7 +12,8 @@
  *      repeats until the viewer runs out of saved posts or you press STOP.
  *
  * The script never calls Instagram's API itself — every request is made by the
- * page in response to a click. Nothing is stored or sent anywhere.
+ * page in response to a click. Nothing is stored or sent anywhere except the
+ * delay you pick under "Advanced settings", which stays in chrome.storage.local.
  *
  * Bulk unlike (the second half of the name) reuses the same loop: it only needs
  * the filled-heart icon path and a second button, since the loop does not care
@@ -40,13 +41,16 @@
 		"M21 17.502a.997.997 0 0 1-.707-.293L12 8.913l-8.293 8.296a1 1 0 1 1-1.414-1.414l9-9.004a1.03 1.03 0 0 1 1.414 0l9 9.004A1 1 0 0 1 21 17.502Z";
 
 	/**
-	 * Pacing: 300 ms between actions, controls polled every 50 ms. This matches
-	 * the timing that was proven in practice. It is fast, so a long run goes past
-	 * Instagram's ~200 requests / 5 minutes budget; raise the two delays if a run
-	 * ever gets throttled.
+	 * Delay between clicks, adjustable under "Advanced settings" in 50 ms steps.
+	 * 300 ms is the fast default; 1500 ms roughly keeps two requests per post
+	 * inside Instagram's ~200 requests / 5 minutes budget.
 	 */
-	const DELAY_AFTER_UNSAVE_MS = 300;
-	const DELAY_AFTER_NEXT_MS = 300;
+	const MIN_DELAY_MS = 300;
+	const MAX_DELAY_MS = 1500;
+	const DELAY_STEP_MS = 50;
+	const DEFAULT_DELAY_MS = 300;
+
+	const STORAGE_KEY = "delayMs";
 
 	const BUTTON_TIMEOUT_MS = 5000;
 	const NEXT_TIMEOUT_MS = 5000;
@@ -71,10 +75,13 @@
 		mode: "idle", // idle | running | finished | failed
 		abort: false,
 		unsaved: 0,
+		delay: DEFAULT_DELAY_MS,
+		advancedOpen: false,
 	};
 
 	let panel = null;
 	let lastPath = null;
+	let saveTimer = null;
 
 	// ---------------------------------------------------------------------------
 	// Boot
@@ -82,6 +89,7 @@
 
 	syncRoute();
 	setInterval(syncRoute, 500);
+	loadDelay();
 
 	function isPostPage() {
 		return POST_PATH.test(window.location.pathname);
@@ -139,6 +147,8 @@
 		panel = buildPanel();
 		document.body.appendChild(panel);
 		panel.addEventListener("click", onPanelClick);
+		panel.addEventListener("input", onPanelInput);
+		applyDelayToControls();
 	}
 
 	function unmountPanel() {
@@ -172,8 +182,35 @@
           <button type="button" class="igu-btn igu-btn-danger"
                   data-action="stop" hidden>${strings.stop}</button>
         </div>
+        <div class="igu-advanced">
+          <button type="button" class="igu-advanced-toggle"
+                  data-action="advanced" aria-expanded="false">
+            <span>Advanced settings</span>
+            <span class="igu-chevron" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="igu-advanced-body" data-ref="advanced" hidden>
+            <div class="igu-field">
+              <label for="igu-delay">Delay between actions</label>
+              <span class="igu-field-value" data-ref="delayValue"></span>
+            </div>
+            <input id="igu-delay" class="igu-range" data-ref="delay"
+                   type="range" min="${MIN_DELAY_MS}" max="${MAX_DELAY_MS}"
+                   step="${DELAY_STEP_MS}" value="${state.delay}" />
+            <p class="igu-hint">
+              Lower is faster but more likely to hit Instagram’s rate limit.
+            </p>
+          </div>
+        </div>
       </div>
     `;
+
+		if (state.advancedOpen) {
+			const body = element.querySelector('[data-ref="advanced"]');
+			const toggle = element.querySelector('[data-action="advanced"]');
+			if (body) body.hidden = false;
+			if (toggle) toggle.setAttribute("aria-expanded", "true");
+		}
+
 		return element;
 	}
 
@@ -194,10 +231,34 @@
 				state.abort = true;
 				setStatus("Stopping…");
 				break;
+			case "advanced":
+				toggleAdvanced();
+				break;
 			case "collapse":
 				toggleCollapsed();
 				break;
 		}
+	}
+
+	function onPanelInput(event) {
+		const target = event.target;
+		if (!(target instanceof HTMLInputElement)) return;
+		if (target.dataset.ref !== "delay") return;
+
+		state.delay = clampDelay(Number(target.value));
+		applyDelayToControls();
+		scheduleSave();
+	}
+
+	function toggleAdvanced() {
+		const body = q('[data-ref="advanced"]');
+		const toggle = q('[data-action="advanced"]');
+		if (!body) return;
+
+		state.advancedOpen = body.hidden;
+		body.hidden = !state.advancedOpen;
+		if (toggle)
+			toggle.setAttribute("aria-expanded", String(state.advancedOpen));
 	}
 
 	function toggleCollapsed() {
@@ -230,6 +291,55 @@
 
 		if (start) start.disabled = running || !isPostPage();
 		if (stop) stop.hidden = !running;
+	}
+
+	function applyDelayToControls() {
+		const input = q('[data-ref="delay"]');
+		const value = q('[data-ref="delayValue"]');
+
+		if (input) input.value = String(state.delay);
+		if (value) value.textContent = `${state.delay} ms`;
+	}
+
+	// ---------------------------------------------------------------------------
+	// Settings
+	// ---------------------------------------------------------------------------
+
+	function loadDelay() {
+		try {
+			chrome.storage.local.get(STORAGE_KEY, (result) => {
+				if (chrome.runtime.lastError) return;
+
+				const stored = Number(result && result[STORAGE_KEY]);
+				if (!Number.isFinite(stored)) return;
+
+				state.delay = clampDelay(stored);
+				applyDelayToControls();
+			});
+		} catch (error) {
+			// Storage is unavailable (for example after reloading the extension);
+			// keep the default for this page.
+		}
+	}
+
+	function scheduleSave() {
+		clearTimeout(saveTimer);
+		saveTimer = setTimeout(saveDelay, 250);
+	}
+
+	function saveDelay() {
+		try {
+			chrome.storage.local.set({ [STORAGE_KEY]: state.delay });
+		} catch (error) {
+			// Ignore: the setting simply will not survive a reload.
+		}
+	}
+
+	function clampDelay(value) {
+		if (!Number.isFinite(value)) return DEFAULT_DELAY_MS;
+
+		const stepped = Math.round(value / DELAY_STEP_MS) * DELAY_STEP_MS;
+		return Math.min(MAX_DELAY_MS, Math.max(MIN_DELAY_MS, stepped));
 	}
 
 	// ---------------------------------------------------------------------------
@@ -268,7 +378,7 @@
 					`Unsaved ${count(state.unsaved)}… ${strings.keepOpen}`,
 				);
 
-				await sleep(DELAY_AFTER_UNSAVE_MS);
+				await sleep(state.delay);
 				if (state.abort) break;
 
 				const nextButton = await waitFor(
@@ -279,7 +389,7 @@
 				if (!nextButton) break;
 
 				nextButton.click();
-				await sleep(DELAY_AFTER_NEXT_MS);
+				await sleep(state.delay);
 			}
 
 			if (state.abort) {
@@ -288,7 +398,10 @@
 				finish(`Done. Unsaved ${count(state.unsaved)}.`);
 			}
 		} catch (error) {
-			finish(error && error.message ? error.message : String(error), true);
+			finish(
+				error && error.message ? error.message : String(error),
+				true,
+			);
 		}
 	}
 

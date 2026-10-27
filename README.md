@@ -8,10 +8,10 @@ to the next one until your saved list is empty or you press **STOP**.
 
 ## Status
 
-| Version   | Feature                                                       |
-| --------- | ------------------------------------------------------------- |
-| **0.1.0** | **Unsave all** — walks your saved posts from the post viewer. |
-| planned   | **Unlike all** — the same loop, driven by the heart button.   |
+| Version   | Feature                                                                                 |
+| --------- | --------------------------------------------------------------------------------------- |
+| **0.2.0** | **Unsave all** — walks your saved posts from the post viewer, with an adjustable delay. |
+| planned   | **Unlike all** — the same loop, driven by the heart button.                             |
 
 The name covers the roadmap: bulk unlike is not in the extension yet, which is
 why the extension is still `0.x`. `1.0.0` is reserved for the release that ships
@@ -21,15 +21,18 @@ so adding unlike means adding the filled-heart icon path and a second button.
 ## Features
 
 - **Unsave all** — unsaves the open post, clicks the next arrow, repeats.
-- **Unlike all** _(coming in 1.0.0)_ — the same loop, driven by the heart button
-  instead of the bookmark. Not available in 0.1.0 yet.
+- **Unlike all** _(planned)_ — the same loop, driven by the heart button instead
+  of the bookmark. Not available yet.
 - **Start / stop** — one START button and a STOP button in a floating panel; the
   number of unsaved posts is shown while it runs.
 - **No API calls** — the extension never talks to Instagram itself. It clicks the
   bookmark button and the page makes the request. No private GraphQL endpoint is
   reverse engineered, and no `doc_id` is hardcoded.
-- **No permissions, no background worker, no data collection** — a single
-  content script that only reads the DOM it already lives in.
+- **Adjustable pacing** — **Advanced settings** in the panel sets the delay
+  between actions from 300 ms to 1500 ms in 50 ms steps, and remembers it.
+- **Only the `storage` permission** — used to remember that one setting. No
+  background worker, no data collection; a single content script that only reads
+  the DOM it already lives in.
 
 ## Install (unpacked)
 
@@ -49,7 +52,9 @@ so adding unlike means adding the filled-heart icon path and a second button.
    keeps going. The panel counts what it has unsaved.
 5. Press **STOP** at any time. Reloading the tab also stops it.
 
-The `−` button in the panel header collapses it.
+The **Advanced settings** section at the bottom of the panel sets the delay
+between actions (300–1500 ms in 50 ms steps); the choice is remembered on this
+device. The `−` button in the panel header collapses the whole panel.
 
 ## How it works
 
@@ -63,10 +68,10 @@ cookies, or touch anything other than the page it runs on.
    outline icon means it is not saved. The script finds that icon by its SVG
    path, walks up to the surrounding clickable element and clicks it.
 3. It then clicks the post viewer's **Next** arrow and repeats.
-4. Actions are spaced 300 ms apart with controls polled every 50 ms. That is
-   fast: a long run goes well past Instagram's ~200 requests / 5 minutes budget.
-   Both delays are constants at the top of `src/content.js` if you would rather
-   go slower.
+4. Actions are spaced by the delay set under **Advanced settings** — 300 ms by
+   default, up to 1500 ms in 50 ms steps — with controls polled every 50 ms. At
+   the default a long run goes well past Instagram's ~200 requests / 5 minutes
+   budget; raise it if a run gets throttled.
 
 Because the page performs the requests, the extension keeps working when
 Instagram changes its private API. If Instagram changes its icons, the run stops
@@ -92,8 +97,8 @@ tools/make-icons.js    Regenerates the icons (no dependencies)
    [developer dashboard](https://chrome.google.com/webstore/devconsole).
 5. Store listing needs, at minimum: the 128 px icon (included), a screenshot
    (1280×800 or 640×400), a short description and a category.
-6. On the privacy tab: the extension collects **no** user data and requests **no**
-   permissions — say exactly that.
+6. On the privacy tab: the extension requests only `storage` (to remember the
+   delay setting) and collects **no** user data — say exactly that.
 
 Two notes for review:
 
@@ -110,10 +115,9 @@ Two notes for review:
   opened first. The panel reminds you when you are still on the grid.
 - The run follows whatever order Instagram's **Next** arrow walks after a post is
   opened from the saved list.
-- The 300 ms pacing is fast on purpose. On a few hundred posts it can trip
-  Instagram's rate limiting (a temporary action block). The limit is enforced by
-  Instagram, not by the extension; raise the two `DELAY_AFTER_*` constants if you
-  want to play safe.
+- The 300 ms default pacing is fast on purpose. On a few hundred posts it can
+  trip Instagram's rate limiting (a temporary action block). Raise the delay under
+  **Advanced settings**; the limit is enforced by Instagram, not by the extension.
 - Automated mass unsaving is not something Instagram's terms of service
   explicitly allow. Use it on your own account and at your own risk.
 
@@ -128,8 +132,8 @@ button's `<svg><path d="…">` and compare it with `UNSAVE_ICON_PATH` in
 `NEXT_ICON_PATH` the same way; it must match the `path` inside the
 `svg[aria-label="Next"]` of the post viewer.
 
-**Instagram throttles the run** — wait 5–10 minutes, then either retry or raise
-`DELAY_AFTER_UNSAVE_MS` / `DELAY_AFTER_NEXT_MS` in `src/content.js`.
+**Instagram throttles the run** — wait 5–10 minutes, then retry with a larger
+delay under **Advanced settings**.
 
 ## Contributing
 

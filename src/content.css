@@ -122,6 +122,84 @@
 	margin-top: 12px;
 }
 
+#igu-panel .igu-advanced {
+	margin-top: 10px;
+	padding-top: 8px;
+	border-top: 1px solid #efefef;
+}
+
+#igu-panel .igu-advanced-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	color: #8e8e8e;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+#igu-panel .igu-advanced-toggle:hover {
+	color: #555555;
+}
+
+#igu-panel .igu-chevron {
+	transition: transform 0.15s ease;
+}
+
+#igu-panel .igu-advanced-toggle[aria-expanded="true"] .igu-chevron {
+	transform: rotate(180deg);
+}
+
+#igu-panel .igu-advanced-body {
+	margin-top: 8px;
+}
+
+#igu-panel .igu-field {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	color: #555555;
+	font-size: 11px;
+}
+
+#igu-panel .igu-field-value {
+	color: #1a1a1a;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+#igu-panel .igu-range {
+	width: 100%;
+	height: 4px;
+	margin: 6px 0 0;
+	border-radius: 999px;
+	background: #dcdcdc;
+	appearance: none;
+	-webkit-appearance: none;
+	outline: none;
+	cursor: pointer;
+}
+
+#igu-panel .igu-range::-webkit-slider-thumb {
+	width: 14px;
+	height: 14px;
+	border: 2px solid #ffffff;
+	border-radius: 50%;
+	background: #0095f6;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+}
+
+#igu-panel .igu-hint {
+	margin: 6px 0 0;
+	color: #8e8e8e;
+	font-size: 10px;
+	line-height: 1.35;
+}
+
 #igu-panel .igu-btn {
 	width: 100%;
 	padding: 8px 10px;
