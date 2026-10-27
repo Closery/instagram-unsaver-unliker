@@ -80,24 +80,22 @@ instead of clicking blindly — see [Troubleshooting](#troubleshooting).
 ### Project layout
 
 ```
-manifest.json          Manifest V3 definition (one content script, no permissions)
+manifest.json          Manifest V3 definition (one content script, only `storage`)
 src/content.js         Panel, click loop and icon detection
 src/content.css        Namespaced panel styles
 icons/                 Generated toolbar and store icons
-tools/make-icons.js    Regenerates the icons (no dependencies)
 .github/ISSUE_TEMPLATE Bug report template
 ```
 
 ## Publishing to the Chrome Web Store
 
 1. Bump `version` in `manifest.json` (the store accepts `0.x` builds).
-2. Run `node tools/make-icons.js` if you changed the icon.
-3. Zip **only** `manifest.json`, `src/` and `icons/` — no `.git`, no `tools/`.
-4. Upload the zip in the
+2. Zip **only** `manifest.json`, `src/` and `icons/` — no `.git`, no `tools/`.
+3. Upload the zip in the
    [developer dashboard](https://chrome.google.com/webstore/devconsole).
-5. Store listing needs, at minimum: the 128 px icon (included), a screenshot
+4. Store listing needs, at minimum: the 128 px icon (included), a screenshot
    (1280×800 or 640×400), a short description and a category.
-6. On the privacy tab: the extension requests only `storage` (to remember the
+5. On the privacy tab: the extension requests only `storage` (to remember the
    delay setting) and collects **no** user data — say exactly that.
 
 Two notes for review:
