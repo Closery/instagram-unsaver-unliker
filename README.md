@@ -1,5 +1,7 @@
 # Instagram Unsaver & Unliker
 
+![Instagram Unsaver & Unliker](cover.png)
+
 Bulk-unsave the posts you saved on Instagram, without clicking through them one
 by one.
 
